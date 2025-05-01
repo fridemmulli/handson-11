@@ -1,47 +1,44 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
-type TaskFormProps = {
-  onSubmit: (task: { title: string; deadline: string }) => void;
-  initialTask?: { title: string; deadline: string };
+type Task = {
+  title: string;
+  description: string;
+  deadline: string;
+  status: "Belum" | "Selesai";
 };
 
-const TaskForm = ({ onSubmit, initialTask }: TaskFormProps) => {
-  const [title, setTitle] = useState(initialTask?.title || "");
-  const [deadline, setDeadline] = useState(initialTask?.deadline || "");
+type Props = {
+  onSubmit: (task: Task) => void;
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
+const TaskForm: React.FC<Props> = ({ onSubmit }) => {
+  const [task, setTask] = useState<Task>({
+    title: "",
+    description: "",
+    deadline: "",
+    status: "Belum",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTask((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!title || !deadline) return;
-    onSubmit({ title, deadline });
-    setTitle("");
-    setDeadline("");
+    onSubmit(task); // pastikan ini terpanggil
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow w-full max-w-md mx-auto mt-4">
-      <h2 className="text-lg font-semibold mb-4">{initialTask ? "Edit Tugas" : "Tambah Tugas Baru"}</h2>
-      <div className="mb-4">
-        <label className="block mb-1 text-sm font-medium">Judul Tugas</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="border border-gray-300 px-3 py-2 w-full rounded"
-          placeholder="Contoh: Laporan Praktikum"
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-1 text-sm font-medium">Deadline</label>
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          className="border border-gray-300 px-3 py-2 w-full rounded"
-        />
-      </div>
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Simpan
-      </button>
+    <form onSubmit={handleSubmit}>
+      <input name="title" value={task.title} onChange={handleChange} placeholder="Judul" />
+      <textarea name="description" value={task.description} onChange={handleChange} placeholder="Deskripsi" />
+      <input type="date" name="deadline" value={task.deadline} onChange={handleChange} />
+      <select name="status" value={task.status} onChange={handleChange}>
+        <option value="Belum">Belum</option>
+        <option value="Selesai">Selesai</option>
+      </select>
+      <button type="submit">Simpan</button>
     </form>
   );
 };
